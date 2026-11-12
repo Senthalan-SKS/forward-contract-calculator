@@ -154,8 +154,9 @@ function PayoffChart({
   const contractX = x(F);
   const shownST = Math.max(minPrice, Math.min(maxPrice, ST));
   const currentX = x(shownST);
-  const buyerAtCurrent = calculateBuyerPayoff(F, n, shownST);
-  const sellerAtCurrent = calculateSellerPayoff(F, n, shownST);
+  const buyerAtCurrent = calculateBuyerPayoff(F, n, ST);
+  const sellerAtCurrent = calculateSellerPayoff(F, n, ST);
+  const markerY = (payoff: number) => Math.max(top, Math.min(top + plotHeight, y(payoff)));
   const ticks = [minPrice, F * 0.75, F, F * 1.25, maxPrice];
 
   return (
@@ -178,12 +179,8 @@ function PayoffChart({
         <line x1={contractX} x2={contractX} y1={top} y2={top + plotHeight} className="contract-line" />
         <path d={`M ${x(minPrice)} ${y(calculateBuyerPayoff(F, n, minPrice))} L ${x(maxPrice)} ${y(calculateBuyerPayoff(F, n, maxPrice))}`} className="buyer-line" />
         <path d={`M ${x(minPrice)} ${y(calculateSellerPayoff(F, n, minPrice))} L ${x(maxPrice)} ${y(calculateSellerPayoff(F, n, maxPrice))}`} className="seller-line" />
-        {ST >= minPrice && ST <= maxPrice && (
-          <>
-            <circle cx={currentX} cy={y(buyerAtCurrent)} r={ST === F ? 8 : 7} className="buyer-dot" />
-            <circle cx={currentX} cy={y(sellerAtCurrent)} r={ST === F ? 4 : 7} className="seller-dot" />
-          </>
-        )}
+        <circle cx={currentX} cy={markerY(buyerAtCurrent)} r={ST === F ? 8 : 7} className="buyer-dot" />
+        <circle cx={currentX} cy={markerY(sellerAtCurrent)} r={ST === F ? 4 : 7} className="seller-dot" />
         {ticks.map((tick, index) => (
           <g key={tick}>
             <line x1={x(tick)} x2={x(tick)} y1={top + plotHeight} y2={top + plotHeight + 5} className="axis-line" />
@@ -202,7 +199,7 @@ function PayoffChart({
         <span><i className="legend-dot" />Current ST</span>
       </div>
       {ST < minPrice || ST > maxPrice ? (
-        <p className="chart-note">Current ST is outside the displayed 50%–150% F range; the chart shows the full payoff lines.</p>
+        <p className="chart-note">Current ST is outside the displayed 50%–150% F range; its markers are shown at the nearest chart edge.</p>
       ) : null}
     </div>
   );
